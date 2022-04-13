@@ -3,36 +3,90 @@
 using Plots
 
 include("project1_jl/helpers.jl")
-include("project1_jl/project1.jl")
 include("project1_jl/simple.jl")
 
-# function rosenbrock(x::Vector)
-#     return (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
-# end
+
+basis(i, n) = [k == i ? 1.0 : 0.0 for k in 1 : n]
+
 
 function rosenbrock(x,y)
     return (1.0 - x)^2 + 100.0 * (y - x^2)^2
 end
 
-# function rosenbrock_gradient(x::Vector)
-#     storage = zeros(2)
-#     storage[1] = -2.0 * (1.0 - x[1]) - 400.0 * (x[2] - x[1]^2) * x[1]
-#     storage[2] = 200.0 * (x[2] - x[1]^2)
-#     return storage
-# end
+function hookeJeeves(f, g, x, n, a, ε, γ=0.5) 
+
+    xhistory = [x]
+    fhistory = [f(x)]
+    y, dim = fhistory[1], length(x)
+
+    while a > ε
+
+        improved = false 
+        x_best, y_best = x, y
+
+        for i in 1 : dim
+            for sgn in (-1,1)
+                # if count(f, g) >= n
+                #     return xhistory, fhistory
+                # end
+                xnew = x + sgn * a * basis(i, dim) 
+                ynew = f(xnew)
+                if ynew < y_best
+                    push!(xhistory, xnew)
+                    push!(fhistory, ynew)
+                    x_best, y_best, improved = xnew, ynew, true
+                end
+            end 
+        end
+        x, y = x_best, y_best
+
+        if !improved
+            a *= γ 
+        end
+    
+    end
+    return xhistory, fhistory 
+
+end
 
 # Plotting optimizer function
-xhistory, fhistory = hookeJeeves(rosenbrock, rosenbrock_gradient, [1, 1], 20, 0.75, 0.001, 0.5)  
-println(xhistory)
+x_rose_1, f_rose_1 = hookeJeeves(rosenbrock, rosenbrock_gradient, [1.4,0.4], 100, 0.10, 0.001, 0.5)  
+x_rose_2, f_rose_2 = hookeJeeves(rosenbrock, rosenbrock_gradient, [1.8,1.2], 100, 0.10, 0.001, 0.5)  
+x_rose_3, f_rose_3 = hookeJeeves(rosenbrock, rosenbrock_gradient, [0.4,1.2], 100, 0.10, 0.001, 0.5) 
+
+x_himm_1, f_himm_1 = hookeJeeves(himmelblau, himmelblau_gradient, [1.4,0.4], 100, 0.10, 0.001, 0.5)  
+x_himm_2, f_himm_2 = hookeJeeves(himmelblau, himmelblau_gradient, [1.8,1.2], 100, 0.10, 0.001, 0.5)  
+x_himm_3, f_himm_3 = hookeJeeves(himmelblau, himmelblau_gradient, [2.4,1.2], 100, 0.10, 0.001, 0.5) 
+
+x_pow_1, f_pow_1 = hookeJeeves(powell, powell_gradient, [1.4, 0.4, 1.5, 1.5], 100, 0.10, 0.001, 0.5)  
+x_pow_2, f_pow_2 = hookeJeeves(powell, powell_gradient, [1.8, 1.2, 2, 2], 100, 0.10, 0.001, 0.5)  
+x_pow_3, f_pow_3 = hookeJeeves(powell, powell_gradient, [2.4, 1.2, 1, 1], 100, 0.10, 0.001, 0.5) 
 
 # Contour Plot of Rosenbrock
 xr = -2:0.1:2
 yr = -2:0.1:2
+# println(x_rose_3)
 
 contour(xr, yr, rosenbrock, levels = [10,25,50,100,200,250,300], colorbar = false, c = cgrad(:viridis, rev = true), legend = false, xlims = (-2, 2), ylims = (-2, 2), xlabel = "x1", ylabel = "x2", aspectratio = :equal, clim = (2, 500))
-plot!([xhistory[i][1] for i = 1:length(xhistory)], [xhistory[i][2] for i = 1:length(xhistory)], color = :black)
-savefig("example_contour.png")
+plot!([x_rose_1[i][1] for i = 1:length(x_rose_1)], [x_rose_1[i][2] for i = 1:length(x_rose_1)], color = :black, label="Hooke Jeeves Method, x0 = [1.4, 0.4]")
+plot!([x_rose_2[i][1] for i = 1:length(x_rose_2)], [x_rose_2[i][2] for i = 1:length(x_rose_2)], color = :blue, label="Hooke Jeeves Method, x0 = [1.8, 1.2]")
+plot!([x_rose_3[i][1] for i = 1:length(x_rose_3)], [x_rose_3[i][2] for i = 1:length(x_rose_3)], color = :red, label="Hooke Jeeves Method, x0 = [0.4, 1.2]")
+savefig("Rosenbrock Contour Plot and Optimization Paths.png")
 
-# Convergence Plot
-plot(collect(1:length(fhistory)), fhistory, xlabel = "Iteration", ylabel = "f(x)")
-savefig("example_convergence.png")
+# Convergence Plot of Rosenbrock
+plot(collect(1:length(f_rose_1)), f_rose_1, xlabel = "Iteration", ylabel = "f(x)",  label="Hooke Jeeves Method, x0 = [1.4, 0.4]")
+plot!(collect(1:length(f_rose_2)), f_rose_2, label="Hooke Jeeves Method, x0 = [1.8, 1.2]")
+plot!(collect(1:length(f_rose_3)), f_rose_3, label="Hooke Jeeves Method, x0 = [0.4, 1.2]")
+savefig("Rosenbrock Optimization Convergence.png")
+
+# Convergence Plot of Himmelblau
+plot(collect(1:length(f_himm_1)), f_himm_1, xlabel = "Iteration", ylabel = "f(x)",  label="Hooke Jeeves Method, x0 = [1.4, 0.4]")
+plot!(collect(1:length(f_himm_2)), f_himm_2, label="Hooke Jeeves Method, x0 = [1.8, 1.2]")
+plot!(collect(1:length(f_himm_3)), f_himm_3, label="Hooke Jeeves Method, x0 = [2.4, 1.2]")
+savefig("Himmelblau Optimization Convergence.png")
+
+# Convergence Plot of Powell
+plot(collect(1:length(f_pow_1)), f_pow_1, xlabel = "Iteration", ylabel = "f(x)",  label="Hooke Jeeves Method, x0 = [1.4, 0.4, 1.5, 1.5]")
+plot!(collect(1:length(f_pow_2)), f_pow_2, label="Hooke Jeeves Method, x0 = [1.8, 1.2, 2, 2]")
+plot!(collect(1:length(f_pow_3)), f_pow_3, label="Hooke Jeeves Method, x0 = [2.4, 1.2, 1, 1]")
+savefig("Powell Optimization Convergence.png")

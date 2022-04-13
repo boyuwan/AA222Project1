@@ -55,22 +55,6 @@ end
 
 basis(i, n) = [k == i ? 1.0 : 0.0 for k in 1 : n]
 
-# function optimizeHelper(f, g, x0, n, step_size)
-
-#     xhistory = [x0]
-#     fhistory = [f(x0)]
-
-#     while count(f, g) < n
-
-#         # ... do some optimization
-#         xnew = 
-#         push!(xhistory, xnew)
-#         push!(xhistory, f(xnew))
-#     end
-       
-#     return xhistory, fhistory
-# end
-
 """
     hookeJeeves(f, g, x, n, a, ε, γ=0.5)   
 
