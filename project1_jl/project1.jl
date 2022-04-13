@@ -1,7 +1,13 @@
 #=
-        project1.jl -- This is where the magic happens!
+        AA 222 Project 1, Unconstrained Optimization
+        File Name: project1.jl
+        File Description: TODO
+        Author: Betty Wan, boyuwan@stanford.edu
+        Date: Apr 11st, 2022
 
-    All of your code must either live in this file, or be `include`d here.
+        References: 
+        [1] Textbook, TODO
+        [2] AA 222 Project Tutorial, https://www.youtube.com/watch?v=ZPZ9xknXGcQ
 =#
 
 #=
@@ -11,20 +17,12 @@
     (since we use it in the backend already anyway)
 =#
 
-# Example:
-# using LinearAlgebra
+# Julia Packages:
+using LinearAlgebra
+using Statistics
 
-#=
-    If you're going to include files, please do so up here. Note that they
-    must be saved in project1_jl and you must use the relative path
-    (not the absolute path) of the file in the include statement.
-
-    [Good]  include("somefile.jl")
-    [Bad]   include("/pathto/project1_jl/somefile.jl")
-=#
-
-# Example
-# include("myfile.jl")
+# File Includes:
+# include("plotting.jl")
 
 
 """
@@ -41,6 +39,86 @@ Returns:
     - The location of the minimum
 """
 function optimize(f, g, x0, n, prob)
-    x_best = x0
+    if prob == "simple1" 
+        xhistory, fhistory = hookeJeeves(f, g, x0, n, 0.75, 0.001, 0.5)
+    elseif prob == "simple2"
+        xhistory, fhistory = hookeJeeves(f, g, x0, n, 1.5, 0.001, 0.5)
+    elseif prob == "simple3"
+        xhistory, fhistory = hookeJeeves(f, g, x0, n, 0.5, 0.001, 0.5)
+    else 
+        xhistory, fhistory = hookeJeeves(f, g, x0, n, 1, 0.001, 0.5)
+    end
+
+    x_best = xhistory[argmin(fhistory)]
     return x_best
+end
+
+basis(i, n) = [k == i ? 1.0 : 0.0 for k in 1 : n]
+
+# function optimizeHelper(f, g, x0, n, step_size)
+
+#     xhistory = [x0]
+#     fhistory = [f(x0)]
+
+#     while count(f, g) < n
+
+#         # ... do some optimization
+#         xnew = 
+#         push!(xhistory, xnew)
+#         push!(xhistory, f(xnew))
+#     end
+       
+#     return xhistory, fhistory
+# end
+
+"""
+    hookeJeeves(f, g, x, n, a, ε, γ=0.5)   
+
+Arguments:
+    - `f`: Function to be optimized
+    - `g`: Gradient function for `f`
+    - `x`: (Vector) Initial position to start from
+    - `n`: (Int) Number of evaluations allowed.
+    - `a`: The starting step size, reads as alpha
+    - `ε`: Tolerance value, at which the function stops running if the step size is less than ε
+    - `γ`: Decay step. The factor of reduction on step size if no improvement is seen
+
+Returns:
+    - The history of x and f explored
+"""
+
+function hookeJeeves(f, g, x, n, a, ε, γ=0.5) 
+
+    xhistory = [x]
+    fhistory = [f(x)]
+    y, dim = fhistory[1], length(x)
+
+    while a > ε
+
+        improved = false 
+        x_best, y_best = x, y
+
+        for i in 1 : dim
+            for sgn in (-1,1)
+                if count(f, g) >= n
+                    return xhistory, fhistory
+                end
+                xnew = x + sgn * a * basis(i, dim) 
+                ynew = f(xnew)
+                if ynew < y_best
+                    push!(xhistory, xnew)
+                    push!(fhistory, ynew)
+                    x_best, y_best, improved = xnew, ynew, true
+                end
+            end 
+        end
+        x, y = x_best, y_best
+
+        if !improved
+            a *= γ 
+        end
+    
+    end
+    return xhistory, fhistory 
+
 end
