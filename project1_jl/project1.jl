@@ -1,12 +1,13 @@
 #=
         AA 222 Project 1, Unconstrained Optimization
         File Name: project1.jl
-        File Description: TODO
+        File Description: This file implements an unconstraint optimization algorithm to optimize given objective functions. The HookeJeeves is used for implementation.
         Author: Betty Wan, boyuwan@stanford.edu
         Date: Apr 11st, 2022
 
         References: 
-        [1] Textbook, TODO
+        [1] M. J. Kochenderfer and T. A. Wheeler, Algorithms for Optimization. 
+            Textbook contents from Chapter 7.3 Hooke-Jeeves & Algorithm 7.5. The Hooke-Jeeves method were referenced and taken inspiration from.
         [2] AA 222 Project Tutorial, https://www.youtube.com/watch?v=ZPZ9xknXGcQ
 =#
 
@@ -18,11 +19,7 @@
 =#
 
 # Julia Packages:
-using LinearAlgebra
 using Statistics
-
-# File Includes:
-# include("plotting.jl")
 
 
 """
@@ -53,11 +50,16 @@ function optimize(f, g, x0, n, prob)
     return x_best
 end
 
+"""
+    A helper function that helps construct the i-th basis vector of length n. Referenced from Textbook [1], P99
+"""
 basis(i, n) = [k == i ? 1.0 : 0.0 for k in 1 : n]
+
 
 """
     hookeJeeves(f, g, x, n, a, ε, γ=0.5)   
 
+    An optimization function that performs direct method optimization on a given objective function. Referenced from Textbook [1], P104
 Arguments:
     - `f`: Function to be optimized
     - `g`: Gradient function for `f`

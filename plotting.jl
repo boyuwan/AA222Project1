@@ -1,3 +1,16 @@
+#=
+        AA 222 Project 1, Unconstrained Optimization
+        File Name: plotting.jl
+        File Description: This file contains the implementation of plots required for Assignment 1 submission.
+        Author: Betty Wan, boyuwan@stanford.edu
+        Date: Apr 11st, 2022
+
+        References: 
+        [1] M. J. Kochenderfer and T. A. Wheeler, Algorithms for Optimization. 
+            Textbook contents from Chapter 7.3 Hooke-Jeeves & Algorithm 7.5. The Hooke-Jeeves method were referenced and taken inspiration from.
+        [2] AA 222 Project Tutorial, https://www.youtube.com/watch?v=ZPZ9xknXGcQ
+=#
+
 # import Pkg
 # Pkg.add("Plots")
 using Plots
